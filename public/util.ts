@@ -77,6 +77,48 @@ const operations: operation[] = [
     method: "DELETE",
     fields: { id: "input" },
   },
+  {
+    name: "Create group",
+    endpoint: "/api/group",
+    method: "POST",
+    fields: { name: "input" },
+  },
+  {
+    name: "Join group",
+    endpoint: "/api/group/join/:name",
+    method: "PUT",
+    fields: { name: "input" },
+  },
+  {
+    name: "Leave group",
+    endpoint: "/api/group/leave/:name",
+    method: "PUT",
+    fields: { name: "input" },
+  },
+  {
+    name: "Get group",
+    endpoint: "/api/group/:name",
+    method: "GET",
+    fields: { name: "input" },
+  },
+  {
+    name: "Create caption",
+    endpoint: "/api/caption",
+    method: "POST",
+    fields: { media: "input", name: "input" },
+  },
+  {
+    name: "Get caption by id",
+    endpoint: "/api/caption/:_id",
+    method: "GET",
+    fields: { _id: "input" },
+  },
+  {
+    name: "Get caption by media id",
+    endpoint: "/api/caption/media/:_id",
+    method: "GET",
+    fields: { _id: "input" },
+  },
 ];
 
 // Do not edit below here.

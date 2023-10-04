@@ -2,7 +2,7 @@ import { ObjectId } from "mongodb";
 
 import { Router, getExpressRouter } from "./framework/router";
 
-import { Friend, Post, User, WebSession } from "./app";
+import { Caption, Friend, Group, Post, User, WebSession } from "./app";
 import { PostDoc, PostOptions } from "./concepts/post";
 import { UserDoc } from "./concepts/user";
 import { WebSessionDoc } from "./concepts/websession";
@@ -136,6 +136,121 @@ class Routes {
     const fromId = (await User.getUserByUsername(from))._id;
     return await Friend.rejectRequest(fromId, user);
   }
-}
 
+  @Router.post("/group")
+  async createGroup(session: WebSessionDoc, name: string) {
+    const created = await Group.create(name);
+    return { msg: created.msg, group: created.group?.name };
+  }
+  @Router.put("/group/leave/:name")
+  async leaveGroup(session: WebSessionDoc, name: string) {
+    const group = Group.getGroupByName(name);
+    const userId = WebSession.getUser(session);
+    return await Group.removeMember(userId, await group);
+  }
+
+  @Router.put("/group/join/:name")
+  async joinGroup(session: WebSessionDoc, name: string) {
+    const group = Group.getGroupByName(name);
+    console.log((await group)._id);
+    const userId = WebSession.getUser(session);
+    return await Group.registerMember(userId, await group);
+  }
+
+  @Router.get("/group/:name")
+  async getGroup(session: WebSessionDoc, name: string) {
+    const group = await Group.getGroupByName(name);
+    return { ...group };
+  }
+
+  @Router.post("/caption")
+  async createCaption(session: WebSessionDoc, media: ObjectId, name: string) {
+    return Caption.create(media, name);
+  }
+
+  @Router.get("/caption/:_id")
+  async getCaption(session: WebSessionDoc, _id: ObjectId) {
+    return Caption.getCaptionById(_id);
+  }
+
+  @Router.get("/caption/media/:_id")
+  async getMediaCaptions(session: WebSessionDoc, _id: ObjectId) {
+    return Caption.getCaptionsByMedia(_id);
+  }
+
+  @Router.post("/post/:location")
+  async postInLocation() {}
+
+  @Router.post("/post/location")
+  async addPostLocation() {}
+
+  @Router.post("/music")
+  async addMusic() {}
+
+  @Router.get("/music/id/:_id")
+  async getMusicById() {}
+
+  @Router.get("/music/artist/:artist")
+  async getMusicByArtist() {}
+
+  @Router.get("/music/name/:name")
+  async getMusicByName() {}
+
+  @Router.put("/vote/upvote/:_id")
+  async upvotePost() {}
+
+  @Router.put("/vote/downvote/:_id")
+  async downvotePost() {}
+
+  @Router.get("/vote/rating/:_id")
+  async getPostRating() {}
+
+  @Router.post("/photobanner/:_id")
+  async setPhotobanner() {}
+
+  @Router.get("/photobanner/:_id")
+  async getPhotobanner() {}
+
+  @Router.post("/compilation/personal")
+  async initializeUserPlaylist() {}
+
+  @Router.post("/compilation/personal/delete/:_id")
+  async deleteUserPlaylist() {}
+
+  @Router.put("/compilation/personal/add")
+  async addUserPlaylistContent() {}
+
+  @Router.put("/compilation/personal/remove")
+  async removeUserPlaylistContent() {}
+
+  @Router.put("/compilation/personal/reorder")
+  async reorderUserPlaylist() {}
+
+  @Router.post("/compilation/headline")
+  async initializeHeadlinePlaylist() {}
+
+  @Router.post("/compilation/headline/delete")
+  async deleteHeadlinePlaylist() {}
+
+  @Router.put("/compilation/headline/add")
+  async addHeadlinePlaylistContent() {}
+
+  @Router.put("/compilation/headline/remove")
+  async removeHeadlinePlaylistContent() {}
+
+  @Router.put("/compilation/headline/reorder")
+  async reorderHeadlinePlaylist() {}
+
+  @Router.post("/compilation/recents")
+  async initializeRecentsPlaylist() {}
+
+  @Router.put("/compilation/recents/add")
+  async addRecentsPlaylistContent() {}
+
+  @Router.put("/compilation/recents/remove")
+  async removeRecentsPlaylistContent() {}
+
+  @Router.put("/compilation/recents/reorder")
+  async reorderRecentsPlaylist() {}
+}
 export default getExpressRouter(new Routes());
