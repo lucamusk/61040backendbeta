@@ -10,15 +10,20 @@ export interface PostOptions {
 
 export interface PostDoc extends BaseDoc {
   author: ObjectId;
-  content: string;
+  content: ObjectId;
+  location: string;
   options?: PostOptions;
+}
+
+export interface PostLocationDoc extends BaseDoc {
+  locationId: ObjectId;
 }
 
 export default class PostConcept {
   public readonly posts = new DocCollection<PostDoc>("posts");
 
-  async create(author: ObjectId, content: string, options?: PostOptions) {
-    const _id = await this.posts.createOne({ author, content, options });
+  async create(author: ObjectId, content: ObjectId, location: ObjectId, options?: PostOptions) {
+    const _id = await this.posts.createOne({ author, content, location, options });
     return { msg: "Post successfully created!", post: await this.posts.readOne({ _id }) };
   }
 
@@ -29,8 +34,8 @@ export default class PostConcept {
     return posts;
   }
 
-  async getByAuthor(author: ObjectId) {
-    return await this.getPosts({ author });
+  async getByAuthor(location: ObjectId, author: ObjectId) {
+    return await this.getPosts({ location, author });
   }
 
   async update(_id: ObjectId, update: Partial<PostDoc>) {

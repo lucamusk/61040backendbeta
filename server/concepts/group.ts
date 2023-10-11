@@ -17,8 +17,13 @@ export default class GroupConcent {
     return { msg: "Group created successfully!", group: await this.groups.readOne({ _id }) };
   }
 
+  async getAllGroups() {
+    const groups = await this.groups.readMany({});
+    return groups;
+  }
+
   async getGroupById(_id: ObjectId) {
-    const group = await this.groups.readOne({ _id });
+    const group = await this.groups.readOne({ _id: new ObjectId(_id) });
     if (group === null) {
       throw new NotFoundError(`Group not found!`);
     }
@@ -39,7 +44,8 @@ export default class GroupConcent {
     return users;
   }
 
-  async userInGroup(userId: ObjectId, group: GroupDoc) {
+  async userInGroup(groupId: ObjectId, userId: ObjectId) {
+    const group = await this.getGroupById(groupId);
     const groupUsers = group.members;
     let inGroup = false;
 
@@ -53,18 +59,18 @@ export default class GroupConcent {
     return inGroup;
   }
 
-  async registerMember(userId: ObjectId, group: GroupDoc) {
-    const groupId = group._id;
-    if (await this.userInGroup(userId, group)) {
+  async registerMember(userId: ObjectId, groupId: ObjectId) {
+    const group = await this.getGroupById(groupId);
+    if (await this.userInGroup(userId, groupId)) {
       throw new NotAllowedError("User already registered in group");
     }
     await this.groups.updateOne({ _id: groupId }, { members: group.members.concat([userId]) });
     return { msg: `Successfully registered user for ${group.name}` };
   }
 
-  async removeMember(user: ObjectId, group: GroupDoc) {
-    const groupId = group._id;
-    if (!(await this.userInGroup(user, group))) {
+  async removeMember(user: ObjectId, groupId: ObjectId) {
+    const group = await this.getGroupById(groupId);
+    if (!(await this.userInGroup(user, groupId))) {
       throw new NotAllowedError("User not registered in group");
     }
 
