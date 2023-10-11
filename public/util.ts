@@ -153,7 +153,7 @@ const operations: operation[] = [
     name: "Delete Post",
     endpoint: "/api/posts/:id",
     method: "DELETE",
-    fields: { id: "input" },
+    fields: { id: "input", group: "input" },
   },
   {
     name: "Get Content by id",

@@ -29,7 +29,7 @@ export default class CompilationConcent {
     return await this.compilations.readMany({ owner: new ObjectId(owner) });
   }
 
-  async getCompilationByName(owner: string, name: string) {
+  async getCompilationByName(owner: ObjectId, name: string) {
     const compilation = await this.compilations.readOne({ owner: new ObjectId(owner), name });
     if (compilation === null) {
       throw new NotFoundError(`Compilation not found!`);

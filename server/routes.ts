@@ -65,7 +65,7 @@ class Routes {
   }
 
   @Router.get("/posts")
-  async getPosts(group: string, author?: string) {
+  async getPosts(group: ObjectId, author?: string) {
     let posts;
     assert(group, new BadValuesError("Please specify a group"));
     if (author) {
@@ -81,7 +81,7 @@ class Routes {
   async createPost(session: WebSessionDoc, music: ObjectId, text: string, group: ObjectId, options?: PostOptions) {
     const user = WebSession.getUser(session);
     const captionResult = await Caption.create(music, text);
-    if (!(await Group.userInGroup(user, group))) {
+    if (!(await Group.userInGroup(group, user))) {
       throw new NotAllowedError("User not in group");
     }
     assert(captionResult.caption, "Failure to create caption");
@@ -100,9 +100,11 @@ class Routes {
   }
 
   @Router.delete("/posts/:_id")
-  async deletePost(session: WebSessionDoc, _id: ObjectId) {
+  async deletePost(session: WebSessionDoc, _id: ObjectId, group: ObjectId) {
     const user = WebSession.getUser(session);
     await Post.isAuthor(user, _id);
+    await Compilation.removeContent((await Compilation.getCompilationByName(group, "timeline"))._id, _id);
+    await Compilation.removeContent((await Compilation.getCompilationByName(group, "recents"))._id, _id);
     return Post.delete(_id);
   }
 
@@ -303,13 +305,15 @@ class Routes {
   }
 
   @Router.put("/vote/upvote/:_id")
-  async upvotePost(post: ObjectId) {
-    return await Vote.upvotePost(post);
+  async upvotePost(session: WebSessionDoc, _id: ObjectId) {
+    const userId = WebSession.getUser(session);
+    return await Vote.upvotePost(_id, userId);
   }
 
-  @Router.put("/vote/downvote/:group/:post")
-  async downvotePost(post: ObjectId) {
-    return await Vote.downvotePost(post);
+  @Router.put("/vote/downvote/:_id")
+  async downvotePost(session: WebSessionDoc, _id: ObjectId) {
+    const userId = WebSession.getUser(session);
+    return await Vote.downvotePost(_id, userId);
   }
 
   @Router.get("/vote/:_id")
